@@ -1,0 +1,1 @@
+from app.api.routers.jobs_router import jobs_router_v1 as jobs_router
