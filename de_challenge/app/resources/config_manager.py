@@ -1,4 +1,5 @@
 import os
+import ast
 import json
 import configparser
 from pathlib import Path
@@ -46,6 +47,9 @@ class ConfigManager:
 
         if variable_type == "str" or variable_type == "string":
             value = config_parser.get(section.upper(), value.upper())
+        elif variable_type == "list" or variable_type == "array":
+            value = config_parser.get(section.upper(), value.upper())
+            value = ast.literal_eval(value)
         elif variable_type == "int" or variable_type == "integer":
             value = config_parser.getint(section.upper(), value.upper())
         elif variable_type == "float" or variable_type == "real":
