@@ -26,5 +26,5 @@ class HiredEmployee(BaseDBModel, BASE):
         BASE.metadata.create_all(ENGINE)
 
     @staticmethod
-    async def insert_many(jobs):
-        return await BaseDBModel.insert_many(entities=jobs, model_class=HiredEmployee)
+    async def insert_many(hired_employees):
+        return await BaseDBModel.insert_many(entities=hired_employees, model_class=HiredEmployee)

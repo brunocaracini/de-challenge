@@ -22,6 +22,6 @@ class Department(BaseDBModel, BASE):
         BASE.metadata.create_all(ENGINE)
 
     @staticmethod
-    async def insert_many(jobs):
-        return await BaseDBModel.insert_many(entities=jobs, model_class=Department)
+    async def insert_many(departments):
+        return await BaseDBModel.insert_many(entities=departments, model_class=Department)
     

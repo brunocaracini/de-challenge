@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Local Dependencies
 from app.resources.config_manager import ConfigManager
+from app.database.table_creations import create_all_tables
 
 # Global variables
 CURRENT_VERSION = ConfigManager.get_conf_value(
@@ -16,7 +17,7 @@ CURRENT_VERSION = ConfigManager.get_conf_value(
 
 try:
     api_routers = __import__(
-        f"app.api.versions.{CURRENT_VERSION}.main_{CURRENT_VERSION}", fromlist=["*"]
+        f"app.api.versions.{CURRENT_VERSION}", fromlist=["*"]
     )
 except ImportError as error:
     print(
@@ -40,6 +41,7 @@ app.add_middleware(
 
 app.include_router(api_routers.jobs_router.router)
 app.include_router(api_routers.departments_router.router)
+app.include_router(api_routers.hired_employees_router.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
