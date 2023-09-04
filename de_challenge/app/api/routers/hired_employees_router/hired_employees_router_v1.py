@@ -2,21 +2,21 @@
 
 # Libraries
 from typing import List
-from app.database.entities.departments import Department
+from app.database.entities.hired_employees import HiredEmployee
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 
 # Local Dependencies
 from app.resources.utils import Utils
-from app.api.versions.v1.schemas_v1 import DepartmentUpload
-from app.controllers.entities.departments_controller import DepartmentController
+from app.api.versions.v1.schemas_v1 import HiredEmployeeUpload
+from app.controllers.entities.hired_employees_controller import HiredEmployeeController
 
 
 router = APIRouter()
-ENDPOINT_BASE_PATH = Utils.router_base_path_calculator(router_name="departments")
+ENDPOINT_BASE_PATH = Utils.router_base_path_calculator(router_name="hired_employees")
 
 
 def validate_csv_headers(csv_headers: List[str]):
-    allowed_headers = Utils.get_class_variables_from_object(Department)
+    allowed_headers = Utils.get_class_variables_from_object(HiredEmployee)
     if csv_headers:
         if set(allowed_headers) != set(csv_headers):
             raise HTTPException(
@@ -28,13 +28,13 @@ def validate_csv_headers(csv_headers: List[str]):
     return csv_headers
 
 
-@router.post(f"{ENDPOINT_BASE_PATH}batch-csv-upload/", tags=["Departments"])
+@router.post(f"{ENDPOINT_BASE_PATH}batch-csv-upload/", tags=["hired_employees"])
 async def upload_batch_csv(
     file: UploadFile = File(...), csv_headers: List[str] = Depends(validate_csv_headers)
 ):
-    return await DepartmentController.batch_from_csv(file=file, headers=csv_headers)
+    return await HiredEmployeeController.batch_from_csv(file=file, headers=csv_headers)
 
 
-@router.post(f"{ENDPOINT_BASE_PATH}", tags=["Departments"])
-async def upload(body: DepartmentUpload):
-    return await DepartmentController.insert_many(jobs=body.jobs)
+@router.post(f"{ENDPOINT_BASE_PATH}", tags=["hired_employees"])
+async def upload(body: HiredEmployeeUpload):
+    return await HiredEmployeeController.insert_many(jobs=body.jobs)
