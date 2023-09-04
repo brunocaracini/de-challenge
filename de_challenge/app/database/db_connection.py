@@ -1,23 +1,44 @@
+"-------------------------------Imports Section-------------------------------"
+
 # Libraries
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
+from sqlalchemy import create_engine, insert
 
 # Local Dependencies
-from config.env_settings import DB_USER, DB_NAME, DB_PORT, DB_HOST, DB_PASSWORD
+from app.config.env_settings import DB_USER, DB_NAME, DB_PORT, DB_HOST, DB_PASSWORD
 
-# Connection string
+
+# Define module-level variables for the engine, session factory, and session
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Create a SQLAlchemy engine
-ENGINE = create_engine(DATABASE_URL)
+ENGINE = create_engine(DATABASE_URL, pool_size=5, max_overflow=10)
 
 # Define an SQLAlchemy declarative base
 BASE = declarative_base()
 
-# Create a session factory
-SESSION = sessionmaker(bind=ENGINE)
+SESSION_FACTORY = sessionmaker(bind=ENGINE)
 
-# Create a session instance
-session = SESSION()
 
+class BaseDBModel:
+    @staticmethod
+    async def insert_many(entities, model_class):
+        results = {"valids": [], "invalids": []}
+        session = SESSION_FACTORY()
+        for entity in entities:
+            try:
+                session.execute(insert(model_class).values(entity))
+                results["valids"].append(entity)
+            except Exception as error:
+                session.rollback()
+                error = error.orig.args[0].split("\n")
+                entity["error"] = {
+                    "description": error[0],
+                    "detail": error[1].lstrip("DETAIL:  "),
+                }
+                results["invalids"].append(entity)
+                continue
+        session.commit()
+        session.close()
+        return results

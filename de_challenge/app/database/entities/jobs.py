@@ -1,18 +1,26 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from app.database.db_connection import BASE,ENGINE, SESSION
-from datetime import datetime
+"-------------------------------Imports Section-------------------------------"
 
-class Job(BASE):
+# Libraries
+from sqlalchemy import Column, Integer, String
+
+# Local Dependencies
+from app.database.db_connection import BaseDBModel, BASE, ENGINE
+
+
+class Job(BaseDBModel, BASE):
     __tablename__ = "jobs"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    job = Column(String, unique=True)
 
     @staticmethod
-    async def insert_one(job: dict):
-        pass
+    def __delete_table__():
+        BASE.metadata.tables["jobs"].drop(ENGINE)
 
     @staticmethod
-    async def insert_many(jobs: list[dict]):
-        pass
+    def __create_table__():
+        BASE.metadata.create_all(ENGINE)
+
+    @staticmethod
+    async def insert_many(jobs):
+        return await BaseDBModel.insert_many(entities=jobs, model_class=Job)
