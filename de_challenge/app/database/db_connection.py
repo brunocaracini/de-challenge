@@ -22,23 +22,30 @@ SESSION_FACTORY = sessionmaker(bind=ENGINE)
 
 
 class BaseDBModel:
+    
     @staticmethod
     async def insert_many(entities, model_class):
         results = {"valids": [], "invalids": []}
-        session = SESSION_FACTORY()
-        for entity in entities:
-            try:
-                session.execute(insert(model_class).values(entity))
-                results["valids"].append(entity)
-            except Exception as error:
-                session.rollback()
-                error = error.orig.args[0].split("\n")
-                entity["error"] = {
-                    "description": error[0],
-                    "detail": error[1].lstrip("DETAIL:  "),
-                }
-                results["invalids"].append(entity)
-                continue
-        session.commit()
-        session.close()
+        with BaseDBModel.session_factory() as session:
+            for entity in entities:
+                try:
+                    session.execute(insert(model_class).values(entity))
+                    results["valids"].append(entity)
+                    session.commit()
+                except Exception as error:
+                    session.rollback()
+                    error = error.orig.args[0].split("\n")
+                    entity["error"] = {
+                        "description": error[0],
+                        "detail": error[1].lstrip("DETAIL:  "),
+                    }
+                    results["invalids"].append(entity)
+                    session.commit()
+                    continue
+            
+            session.close()
         return results
+    
+    @staticmethod
+    def session_factory():
+        return SESSION_FACTORY()

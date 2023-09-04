@@ -9,6 +9,7 @@ from app.database.entities.hired_employees import HiredEmployee as HiredEmployee
 
 
 class HiredEmployeeController(Controller):
+    
     @staticmethod
     async def batch_from_csv(file: bytes, headers: list[str]):
         hired_employees = await HiredEmployeeController.read_csv_reader(file=file, headers=headers)
@@ -18,3 +19,7 @@ class HiredEmployeeController(Controller):
     async def insert_many(hired_employees: list[dict]):
         hired_employees = [{**obj.__dict__} for obj in hired_employees]
         return await HiredEmployeeData.insert_many(hired_employees=hired_employees)
+    
+    @staticmethod
+    async def get_by_job_and_department(year: int):
+        return await HiredEmployeeData.get_by_job_and_department(year=year)
