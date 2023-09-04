@@ -11,8 +11,8 @@ from app.api.versions.v1.schemas_v1 import HiredEmployeeUpload
 from app.controllers.entities.hired_employees_controller import HiredEmployeeController
 
 
-router = APIRouter()
 ENDPOINT_BASE_PATH = Utils.router_base_path_calculator(router_name="hired_employees")
+router = APIRouter(prefix=ENDPOINT_BASE_PATH)
 
 
 def validate_csv_headers(csv_headers: List[str]):
@@ -28,13 +28,17 @@ def validate_csv_headers(csv_headers: List[str]):
     return csv_headers
 
 
-@router.post(f"{ENDPOINT_BASE_PATH}batch-csv-upload/", tags=["hired_employees"])
+@router.post(f"/batch-csv-upload/", tags=["hired_employees"])
 async def upload_batch_csv(
     file: UploadFile = File(...), csv_headers: List[str] = Depends(validate_csv_headers)
 ):
     return await HiredEmployeeController.batch_from_csv(file=file, headers=csv_headers)
 
 
-@router.post(f"{ENDPOINT_BASE_PATH}", tags=["hired_employees"])
+@router.post("/", tags=["hired_employees"])
 async def upload(body: HiredEmployeeUpload):
-    return await HiredEmployeeController.insert_many(jobs=body.jobs)
+    return await HiredEmployeeController.insert_many(jobs=body.hired_employees)
+
+@router.get("/quarter-and-segment/", tags=["hired_employees"])
+async def get_by_job_and_department(year: int):
+    return await HiredEmployeeController.get_by_job_and_department(year=year)

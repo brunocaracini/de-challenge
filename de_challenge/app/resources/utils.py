@@ -14,7 +14,7 @@ class Utils:
             section="routers",
             value=f"{router_name}_router_base_path",
         )
-        return f"{BASE_PATH}{CURRENT_VERSION}/{ROUTER_BASE_PATH}"
+        return f"{BASE_PATH}{CURRENT_VERSION}/{ROUTER_BASE_PATH}".rstrip('/')
 
     @staticmethod
     def get_class_variables_from_object(obj: object):
