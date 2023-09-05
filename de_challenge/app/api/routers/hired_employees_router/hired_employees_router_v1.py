@@ -28,17 +28,23 @@ def validate_csv_headers(csv_headers: List[str]):
     return csv_headers
 
 
-@router.post(f"/batch-csv-upload/", tags=["hired_employees"])
+@router.post(f"/batch-csv-upload/", tags=["Hired Employees"])
 async def upload_batch_csv(
     file: UploadFile = File(...), csv_headers: List[str] = Depends(validate_csv_headers)
 ):
     return await HiredEmployeeController.batch_from_csv(file=file, headers=csv_headers)
 
 
-@router.post("/", tags=["hired_employees"])
+@router.post("/", tags=["Hired Employees"])
 async def upload(body: HiredEmployeeUpload):
     return await HiredEmployeeController.insert_many(jobs=body.hired_employees)
 
-@router.get("/quarter-and-segment/", tags=["hired_employees"])
-async def get_by_job_and_department(year: int):
+
+@router.get("/by-job-and-department-by-quarter/", tags=["Hired Employees"])
+async def get_by_job_and_department(year: int = 2021):
     return await HiredEmployeeController.get_by_job_and_department(year=year)
+
+
+@router.get("/by-department-higher-than-year-mean/", tags=["Hired Employees"])
+async def get_by_department_higher_than_year_mean(year: int = 2021):
+    return await HiredEmployeeController.get_by_department_higher_than_year_mean(year=year)

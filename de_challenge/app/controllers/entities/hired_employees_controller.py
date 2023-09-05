@@ -23,3 +23,7 @@ class HiredEmployeeController(Controller):
     @staticmethod
     async def get_by_job_and_department(year: int):
         return await HiredEmployeeData.get_by_job_and_department(year=year)
+    
+    @staticmethod
+    async def get_by_department_higher_than_year_mean(year: int):
+        return await HiredEmployeeData.get_by_department_higher_than_year_mean(year=year)

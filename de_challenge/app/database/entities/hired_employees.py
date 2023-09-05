@@ -10,8 +10,6 @@ from sqlalchemy import (
     ForeignKey,
     func,
     case,
-    desc,
-    asc,
     extract,
 )
 
@@ -65,4 +63,41 @@ class HiredEmployee(BaseDBModel, BASE):
             .group_by(Department.department, Job.job)
             .order_by(Department.department, Job.job)
         )
+        return [row._mapping for row in query.all()]
+
+    @staticmethod
+    async def get_by_department_higher_than_year_mean(year: int):
+        from app.database.entities.departments import Department
+
+        session = BaseDBModel.session_factory()
+        subquery = (
+            session.query(
+                Department.id.label("department_id"),
+                func.count(HiredEmployee.id).label("count"),
+            )
+            .join(HiredEmployee, Department.id == HiredEmployee.department_id)
+            .filter(func.extract("year", HiredEmployee.datetime) == year)
+            .group_by(Department.id)
+            .subquery()
+        )
+
+        # Main query to retrieve department information with hired employee counts
+        query = (
+            session.query(
+                Department.id,
+                Department.department,
+                func.count(HiredEmployee.id).label("hired"),
+            )
+            .join(HiredEmployee, Department.id == HiredEmployee.department_id)
+            .filter(func.extract("year", HiredEmployee.datetime) == year)
+            .group_by(Department.id, Department.department)
+            .having(
+                func.count(HiredEmployee.id)
+                > session.query(
+                    func.avg(subquery.c.count).label("mean_employees_hired")
+                ).scalar()
+            )
+            .order_by(func.count(HiredEmployee.id).desc())
+        )
+
         return [row._mapping for row in query.all()]
