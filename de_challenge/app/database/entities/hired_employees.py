@@ -14,6 +14,8 @@ from sqlalchemy import (
 )
 
 # Local Dependencies
+from app.database.entities.jobs import Job
+from app.database.entities.departments import Department
 from app.database.db_connection import BaseDBModel, BASE, ENGINE
 
 
@@ -42,9 +44,6 @@ class HiredEmployee(BaseDBModel, BASE):
 
     @staticmethod
     async def get_by_job_and_department(year: int):
-        from app.database.entities.departments import Department
-        from app.database.entities.jobs import Job
-
         session = BaseDBModel.session_factory()
         quarter = extract("quarter", HiredEmployee.datetime)
 
@@ -67,8 +66,6 @@ class HiredEmployee(BaseDBModel, BASE):
 
     @staticmethod
     async def get_by_department_higher_than_year_mean(year: int):
-        from app.database.entities.departments import Department
-
         session = BaseDBModel.session_factory()
         subquery = (
             session.query(
