@@ -49,7 +49,7 @@ async def upload_batch_csv(
 
 @router.post("/", tags=["Hired Employees"])
 async def upload(body: HiredEmployeeUpload):
-    return await HiredEmployeeController.insert_many(jobs=body.hired_employees)
+    return await HiredEmployeeController.insert_many(hired_employees=body.hired_employees)
 
 
 @router.get("/by-job-and-department-by-quarter/", tags=["Hired Employees"])

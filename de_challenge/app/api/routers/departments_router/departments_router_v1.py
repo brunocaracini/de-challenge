@@ -29,7 +29,7 @@ def validate_csv_headers(csv_headers: List[str], first_row_headers: bool = False
         return None
 
 
-@router.post(f"/batch-csv-upload/", tags=["Hired Employees"])
+@router.post(f"/batch-csv-upload/", tags=["Departments"])
 async def upload_batch_csv(
     file: UploadFile = File(...),
     first_row_headers: bool = False,
@@ -42,4 +42,4 @@ async def upload_batch_csv(
 
 @router.post(f"/", tags=["Departments"])
 async def upload(body: DepartmentUpload):
-    return await DepartmentController.insert_many(jobs=body.departments)
+    return await DepartmentController.insert_many(departments=body.departments)

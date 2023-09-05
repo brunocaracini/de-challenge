@@ -29,7 +29,7 @@ def validate_csv_headers(csv_headers: List[str], first_row_headers: bool = False
         return None
 
 
-@router.post(f"/batch-csv-upload/", tags=["Hired Employees"])
+@router.post(f"/batch-csv-upload/", tags=["Jobs"])
 async def upload_batch_csv(
     file: UploadFile = File(...),
     first_row_headers: bool = False,
