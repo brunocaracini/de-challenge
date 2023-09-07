@@ -15,10 +15,11 @@ DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NA
 # Create a SQLAlchemy engine
 ENGINE = create_engine(DATABASE_URL, pool_size=5, max_overflow=10)
 
+# Define session factory for sessioon creation
+SESSION_FACTORY = sessionmaker(bind=ENGINE)
+
 # Define an SQLAlchemy declarative base
 BASE = declarative_base()
-
-SESSION_FACTORY = sessionmaker(bind=ENGINE)
 
 
 class BaseDBModel:
