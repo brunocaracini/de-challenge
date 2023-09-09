@@ -31,8 +31,8 @@ jobs:
      
     - name: Build and push container image to registry 
       run: |
-        docker build . -t dechallengecd.azurecr.io/de_challenge:${{ github.sha }}
-        docker push dechallengecd.azurecr.io/de_challenge:${{ github.sha }}
+        docker build . -t dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}
+        docker push dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}
         
         
     - name: Deploy to App Service
