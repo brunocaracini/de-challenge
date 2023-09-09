@@ -1,0 +1,46 @@
+# Define the services for your application.
+services:
+  # The "server" service for your application.
+  server:
+    # Build the "server" service using the Dockerfile in the current directory.
+    build:
+      context: .
+
+    # Map port 8000 on your host machine to port 8000 in the container.
+    ports:
+      - 8000:8000
+
+  # The "db" service using the official PostgreSQL image.
+  db:
+    image: postgres
+
+    # Always restart the "db" service if it stops.
+    restart: always
+
+    # Set the PostgreSQL user to "postgres".
+    user: postgres
+
+    # Mount a volume to persist PostgreSQL data between container restarts.
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+    # Define PostgreSQL environment variables.
+    environment:
+      - POSTGRES_DB=example
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+
+    # Expose port 5432 within the container.
+    expose:
+      - 5432
+
+    # Define a health check to ensure the database is ready.
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Define a named volume "db-data" for persisting database data.
+volumes:
+  db-data:
