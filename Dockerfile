@@ -37,8 +37,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 USER root
 
 # Copy the source code and dependency configuration files into the container.
-COPY pyproject.toml poetry.lock ./
-COPY . .
+COPY ./de_challenge/pyproject.toml ./de_challenge/poetry.lock ./
+COPY ./de_challenge/ .
 
 # Install system-level dependencies (e.g., libraries) as needed.
 RUN apt-get update && apt-get install -y gcc
