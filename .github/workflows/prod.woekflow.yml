@@ -39,8 +39,7 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'dechallenge'
-        images: 'dechallengecd.azurecr.io/de_challenge:${{ github.sha }}'
-        slot-name: 'staging'
+        images: 'dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}'
         
         
     - name: Azure logout
