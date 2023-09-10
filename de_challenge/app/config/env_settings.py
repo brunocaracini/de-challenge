@@ -7,7 +7,7 @@ if not os.getenv('ENVIRONMENT', False):
     db_host = socket.gethostbyname("db")
 
     # You can print the resolved IP address for debugging purposes
-    print(f"Resolved DB host IP: {db_host}")
+    print(f"Resolved DB host IP {db_host}")
     from dotenv import load_dotenv
     load_dotenv('/.env',)
 
