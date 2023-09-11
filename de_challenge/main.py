@@ -50,6 +50,7 @@ elif "delete_tables" in sys.argv:
     delete_all_tables()
 
 
+app.include_router(api_routers.health_router.router)
 app.include_router(api_routers.jobs_router.router)
 app.include_router(api_routers.departments_router.router)
 app.include_router(api_routers.hired_employees_router.router)
