@@ -24,27 +24,25 @@ BASE = declarative_base()
 
 class BaseDBModel:
     
-    @staticmethod
-    async def insert_many(entities, model_class):
+    @classmethod
+    async def insert_many(cls, entities, model_class, db):
         results = {"valids": [], "invalids": []}
-        with BaseDBModel.session_factory() as session:
-            for entity in entities:
-                try:
-                    session.execute(insert(model_class).values(entity))
-                    results["valids"].append(entity)
-                    session.commit()
-                except Exception as error:
-                    session.rollback()
-                    error = error.orig.args[0].split("\n")
-                    entity["error"] = {
-                        "description": error[0],
-                        "detail": error[1].lstrip("DETAIL:  "),
-                    }
-                    results["invalids"].append(entity)
-                    session.commit()
-                    continue
-            
-            session.close()
+        for entity in entities:
+            try:
+                db.execute(insert(model_class).values(entity))
+                results["valids"].append(entity)
+                db.commit()
+            except Exception as error:
+                db.rollback()
+                print(str(error))
+                error = error.orig.args[0].split("\n")
+                entity["error"] = {
+                    "description": error[0],
+                    "detail": error[1].lstrip("DETAIL:  "),
+                }
+                results["invalids"].append(entity)
+                db.commit()
+                continue            
         return results
     
     @staticmethod
