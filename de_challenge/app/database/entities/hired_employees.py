@@ -12,6 +12,7 @@ from sqlalchemy import (
     case,
     extract,
 )
+from sqlalchemy.orm import Session
 
 # Local Dependencies
 from app.database.entities.jobs import Job
@@ -37,62 +38,59 @@ class HiredEmployee(BaseDBModel, BASE):
         cls.metadata.create_all(ENGINE)
 
     @classmethod
-    async def insert_many(cls, hired_employees: list[dict]):
-        return await super().insert_many(entities=hired_employees, model_class=cls)
+    async def insert_many(cls, hired_employees: list[dict], db: Session):
+        return await super().insert_many(entities=hired_employees, model_class=cls, db=db)
 
     @classmethod
-    async def get_by_job_and_department(cls, year: int):
-        with super().session_factory() as session:
-            quarter = extract("quarter", HiredEmployee.datetime)
-
-            query = (
-                session.query(
-                    Department.department.label("Department"),
-                    Job.job.label("Job"),
-                    func.sum(case((quarter == 1, 1), else_=0)).label("Q1"),
-                    func.sum(case((quarter == 2, 1), else_=0)).label("Q2"),
-                    func.sum(case((quarter == 3, 1), else_=0)).label("Q3"),
-                    func.sum(case((quarter == 4, 1), else_=0)).label("Q4"),
-                )
-                .join(Department, cls.department_id == Department.id)
-                .join(Job, cls.job_id == Job.id)
-                .filter(extract("year", cls.datetime) == year)
-                .group_by(Department.department, Job.job)
-                .order_by(Department.department, Job.job)
+    async def get_by_job_and_department(cls, year: int, db: Session):
+        quarter = extract("quarter", HiredEmployee.datetime)
+        query = (
+            db.query(
+                Department.department.label("Department"),
+                Job.job.label("Job"),
+                func.sum(case((quarter == 1, 1), else_=0)).label("Q1"),
+                func.sum(case((quarter == 2, 1), else_=0)).label("Q2"),
+                func.sum(case((quarter == 3, 1), else_=0)).label("Q3"),
+                func.sum(case((quarter == 4, 1), else_=0)).label("Q4"),
             )
-            return [row._mapping for row in query.all()]
+            .join(Department, cls.department_id == Department.id)
+            .join(Job, cls.job_id == Job.id)
+            .filter(extract("year", cls.datetime) == year)
+            .group_by(Department.department, Job.job)
+            .order_by(Department.department, Job.job)
+        )
+        return [row._mapping for row in query.all()]
 
     @classmethod
-    async def get_by_department_higher_than_year_mean(cls, year: int):
-        with super().session_factory() as session:
-            subquery = (
-                session.query(
-                    Department.id.label("department_id"),
-                    func.count(cls.id).label("count"),
-                )
-                .join(cls, Department.id == cls.department_id)
-                .filter(func.extract("year", cls.datetime) == year)
-                .group_by(Department.id)
-                .subquery()
+    async def get_by_department_higher_than_year_mean(cls, year: int, db: Session):
+        subquery = (
+            db.query(
+                Department.id.label("department_id"),
+                func.count(cls.id).label("count"),
             )
+            .join(cls, Department.id == cls.department_id)
+            .filter(func.extract("year", cls.datetime) == year)
+            .group_by(Department.id)
+            .subquery()
+        )
 
-            # Main query to retrieve department information with hired employee counts
-            query = (
-                session.query(
-                    Department.id,
-                    Department.department,
-                    func.count(cls.id).label("hired"),
-                )
-                .join(cls, Department.id == cls.department_id)
-                .filter(func.extract("year", cls.datetime) == year)
-                .group_by(Department.id, Department.department)
-                .having(
-                    func.count(cls.id)
-                    > session.query(
-                        func.avg(subquery.c.count).label("mean_employees_hired")
-                    ).scalar()
-                )
-                .order_by(func.count(cls.id).desc())
+        # Main query to retrieve department information with hired employee counts
+        query = (
+            db.query(
+                Department.id,
+                Department.department,
+                func.count(cls.id).label("hired"),
             )
+            .join(cls, Department.id == cls.department_id)
+            .filter(func.extract("year", cls.datetime) == year)
+            .group_by(Department.id, Department.department)
+            .having(
+                func.count(cls.id)
+                > db.query(
+                    func.avg(subquery.c.count).label("mean_employees_hired")
+                ).scalar()
+            )
+            .order_by(func.count(cls.id).desc())
+        )
 
-            return [row._mapping for row in query.all()]
+        return [row._mapping for row in query.all()]

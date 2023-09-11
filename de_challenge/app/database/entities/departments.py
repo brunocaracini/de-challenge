@@ -1,6 +1,7 @@
 "-------------------------------Imports Section-------------------------------"
 
 # Libraries
+from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String
 
 # Local Dependencies
@@ -22,6 +23,6 @@ class Department(BaseDBModel, BASE):
         cls.metadata.create_all(ENGINE)
 
     @classmethod
-    async def insert_many(cls, departments):
-        return await super().insert_many(entities=departments, model_class=cls)
+    async def insert_many(cls, departments, db: Session):
+        return await super().insert_many(entities=departments, model_class=cls, db=db)
     

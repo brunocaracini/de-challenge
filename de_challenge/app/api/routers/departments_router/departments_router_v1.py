@@ -2,11 +2,13 @@
 
 # Libraries
 from typing import List
+from sqlalchemy.orm import Session
 from app.database.entities.departments import Department
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 
 # Local Dependencies
 from app.resources.utils import Utils
+from app.api.versions.v1.dependencies_v1 import get_db
 from app.api.versions.v1.schemas_v1 import DepartmentUpload
 from app.controllers.entities.departments_controller import DepartmentController
 
@@ -15,6 +17,7 @@ ENDPOINT_BASE_PATH = Utils.router_base_path_calculator(router_name="departments"
 router = APIRouter(prefix=ENDPOINT_BASE_PATH)
 
 
+# Router Dependencies
 def validate_csv_headers(csv_headers: List[str], first_row_headers: bool = False):
     allowed_headers = Utils.get_class_variables_from_object(Department)
     if not first_row_headers:
@@ -34,12 +37,13 @@ async def upload_batch_csv(
     file: UploadFile = File(...),
     first_row_headers: bool = False,
     csv_headers: List[str] = Depends(validate_csv_headers),
+    db: Session = Depends(get_db),
 ):
     return await DepartmentController.batch_from_csv(
-        file=file, first_row_headers=first_row_headers, headers=csv_headers
+        file=file, first_row_headers=first_row_headers, headers=csv_headers, db=db
     )
 
 
 @router.post(f"/", tags=["Departments"])
-async def upload(body: DepartmentUpload):
-    return await DepartmentController.insert_many(departments=body.departments)
+async def upload(body: DepartmentUpload, db: Session = Depends(get_db)):
+    return await DepartmentController.insert_many(departments=body.departments, db=db)

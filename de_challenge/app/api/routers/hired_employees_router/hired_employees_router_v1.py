@@ -3,11 +3,13 @@
 # Libraries
 import datetime
 from typing import List
+from sqlalchemy.orm import Session
 from app.database.entities.hired_employees import HiredEmployee
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 
 # Local Dependencies
 from app.resources.utils import Utils
+from app.api.versions.v1.dependencies_v1 import get_db
 from app.api.versions.v1.schemas_v1 import HiredEmployeeUpload
 from app.controllers.entities.hired_employees_controller import HiredEmployeeController
 
@@ -16,6 +18,7 @@ ENDPOINT_BASE_PATH = Utils.router_base_path_calculator(router_name="hired_employ
 router = APIRouter(prefix=ENDPOINT_BASE_PATH)
 
 
+# Router Dependencies
 def validate_csv_headers(csv_headers: List[str], first_row_headers: bool = False):
     allowed_headers = Utils.get_class_variables_from_object(HiredEmployee)
     if not first_row_headers:
@@ -48,17 +51,28 @@ async def upload_batch_csv(
 
 
 @router.post("/", tags=["Hired Employees"])
-async def upload(body: HiredEmployeeUpload):
-    return await HiredEmployeeController.insert_many(hired_employees=body.hired_employees)
+async def upload(
+    body: HiredEmployeeUpload,
+    db: Session = Depends(get_db),
+):
+    return await HiredEmployeeController.insert_many(
+        hired_employees=body.hired_employees, db=db
+    )
 
 
 @router.get("/by-job-and-department-by-quarter/", tags=["Hired Employees"])
-async def get_by_job_and_department(year: int = Depends(validate_year)):
-    return await HiredEmployeeController.get_by_job_and_department(year=year)
+async def get_by_job_and_department(
+    year: int = Depends(validate_year),
+    db: Session = Depends(get_db),
+):
+    return await HiredEmployeeController.get_by_job_and_department(year=year, db=db)
 
 
 @router.get("/by-department-higher-than-year-mean/", tags=["Hired Employees"])
-async def get_by_department_higher_than_year_mean(year: int = Depends(validate_year)):
+async def get_by_department_higher_than_year_mean(
+    year: int = Depends(validate_year),
+    db: Session = Depends(get_db),
+):
     return await HiredEmployeeController.get_by_department_higher_than_year_mean(
-        year=year
+        year=year, db=db
     )
