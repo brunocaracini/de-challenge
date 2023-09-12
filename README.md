@@ -122,7 +122,7 @@ This application is a REST API that handles historical data from CSV files and i
 #### Deployed version in Azure: https://dechallenge.azurewebsites.net/docs#/
 
 ### Technology Stack 🚀
-- Programming Language: Python with Poetry
+- Programming Language: Python 3.9.5 with Poetry
 - Web Framework: FastAPI
 - Database: PostgreSQL (Docker container for local development, Azure PostgreSQL for production)
 - Cloud: Microsoft Azure

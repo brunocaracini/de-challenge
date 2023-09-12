@@ -44,6 +44,7 @@ jobs:
         run: |
           if [ $? -eq 0 ]; then
             echo "Tests passed. Proceeding with deployment."
+            echo "::set-output name=tests_passed::true"
           else
             echo "Tests failed. Skipping deployment."
             echo "::set-output name=tests_passed::false"
