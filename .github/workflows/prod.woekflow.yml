@@ -1,48 +1,68 @@
 name: Build and deploy to production
 
-on: 
+on:
   push:
-    branches: 
-      - main
-      
+    branches:
+      - development
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    
-    - name: Checkout GitHub Actions
-      uses: actions/checkout@main
-      
-      
-    - name: Login via Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
-        
-    - name: Login to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: fastapicd.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-     
-     
-    - name: Build and push container image to registry 
-      run: |
-        docker build . -t dechallengecd.azurecr.io/de_challenge:${{ github.sha }}
-        docker push dechallengecd.azurecr.io/de_challenge:${{ github.sha }}
-        
-        
-    - name: Deploy to App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'dechallenge'
-        images: 'dechallengecd.azurecr.io/de_challenge:${{ github.sha }}'
-        slot-name: 'staging'
-        
-        
-    - name: Azure logout
-      run: |
-        az logout
+
+      - name: Checkout GitHub Actions
+        uses: actions/checkout@main
+
+      - name: Login via Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: dechallengecd.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Clone the code
+        run: |
+          git clone https://github.com/brunocaracini/de-challenge.git
+
+      - name: Install Poetry dependencies and run the Tests
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          python3 -m venv venv
+          source venv/bin/activate
+          cd de_challenge
+          poetry install
+          poetry run pytest
+
+      - name: Check test status
+        id: check-tests
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Tests passed. Proceeding with deployment."
+            echo "::set-output name=tests_passed::true"
+          else
+            echo "Tests failed. Skipping deployment."
+            echo "::set-output name=tests_passed::false"
+          fi
+
+      - name: Build and push container image to registry
+        if: steps.check-tests.outputs.tests_passed == 'true'
+        run: |
+          docker build . -t dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}
+          docker push dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}
+
+      - name: Deploy to App Service
+        if: steps.check-tests.outputs.tests_passed == 'true'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'dechallenge'
+          images: 'dechallengecd.azurecr.io/de_challenge-server:${{ github.sha }}'
+
+      - name: Azure logout
+        run: |
+          az logout

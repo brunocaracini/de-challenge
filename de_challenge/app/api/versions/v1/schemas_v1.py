@@ -1,7 +1,7 @@
 "-------------------------------Imports Section-------------------------------"
 
 # Libraries
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional, Union, List
 
 # Local Dependencies
@@ -22,7 +22,7 @@ class JobModel(BaseModel):
 class JobUpload(BaseModel):
     jobs: List[JobModel]
 
-    @validator("jobs")
+    @field_validator("jobs")
     def validate_list_length(cls, value):
         print(MIN_BATCH_SIZE, MAX_BATCH_SIZE)
         if not MIN_BATCH_SIZE <= len(value) <= MAX_BATCH_SIZE:
@@ -41,7 +41,7 @@ class DepartmentModel(BaseModel):
 class DepartmentUpload(BaseModel):
     departments: List[DepartmentModel]
 
-    @validator("departments")
+    @field_validator("departments")
     def validate_list_length(cls, value):
         print(MIN_BATCH_SIZE, MAX_BATCH_SIZE)
         if not MIN_BATCH_SIZE <= len(value) <= MAX_BATCH_SIZE:
@@ -61,7 +61,7 @@ class HiredEmployeeModel(BaseModel):
 class HiredEmployeeUpload(BaseModel):
     hired_employees: List[HiredEmployeeModel]
 
-    @validator("hired_employees")
+    @field_validator("hired_employees")
     def validate_list_length(cls, value):
         print(MIN_BATCH_SIZE, MAX_BATCH_SIZE)
         if not MIN_BATCH_SIZE <= len(value) <= MAX_BATCH_SIZE:

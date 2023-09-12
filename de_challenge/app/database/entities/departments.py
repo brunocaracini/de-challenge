@@ -1,6 +1,7 @@
 "-------------------------------Imports Section-------------------------------"
 
 # Libraries
+from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String
 
 # Local Dependencies
@@ -13,15 +14,15 @@ class Department(BaseDBModel, BASE):
     id = Column(Integer, primary_key=True)
     department = Column(String, unique=True)
 
-    @staticmethod
-    def __delete_table__():
-        BASE.metadata.tables["departments"].drop(ENGINE)
+    @classmethod
+    def delete_table(cls):
+        cls.metadata.drop_all(ENGINE)
 
-    @staticmethod
-    def __create_table__():
-        BASE.metadata.create_all(ENGINE)
+    @classmethod
+    def __create_table__(cls):
+        cls.metadata.create_all(ENGINE)
 
-    @staticmethod
-    async def insert_many(departments):
-        return await BaseDBModel.insert_many(entities=departments, model_class=Department)
+    @classmethod
+    async def insert_many(cls, departments, db: Session):
+        return await super().insert_many(entities=departments, model_class=cls, db=db)
     
