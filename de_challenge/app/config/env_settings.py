@@ -7,7 +7,7 @@ if not os.getenv("ENVIRONMENT", False):
 
     print("Container database will be used as no environment has been defined")
     load_dotenv(
-        "/.env",
+        "./.env",
     )
 else:
     print(f"Running into environment: {os.environ.get('ENVIRONMENT')}")
