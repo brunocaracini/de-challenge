@@ -11,7 +11,7 @@ router = APIRouter(tags=["Health"])
 
 @router.get("/")
 async def app_health():
-    return "App is up and running :)."
+    return "App is up and running :)"
 
 
 @router.get("/db-health/")
