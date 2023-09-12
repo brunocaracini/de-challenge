@@ -26,19 +26,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Check if 'de_challenge' directory exists
-        id: check-directory
-        run: |
-          if [ -d "de_challenge" ]; then
-            echo "Directory 'de_challenge' exists."
-            echo "::set-output name=directory_exists::true"
-          else
-            echo "Directory 'de_challenge' does not exist."
-            echo "::set-output name=directory_exists::false"
-          fi
-
       - name: Clone the code if 'de_challenge' directory does not exist
-        if: steps.check-directory.outputs.directory_exists == 'false'
         run: |
           git clone https://github.com/brunocaracini/de-challenge.git
           cd de_challenge
@@ -48,10 +36,12 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           python3 -m venv venv
           source venv/bin/activate
+          cd de_challenge
           poetry install
 
       - name: Run tests with Poetry
         run: |
+          cd de_challenge
           poetry run pytest  # Adjust the testing command as needed
 
       - name: Check test status
