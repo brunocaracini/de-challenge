@@ -38,11 +38,7 @@ jobs:
           source venv/bin/activate
           cd de_challenge
           poetry install
-
-      - name: Run tests with Poetry
-        run: |
-          cd de_challenge
-          poetry run pytest  # Adjust the testing command as needed
+          poetry run pytest
 
       - name: Check test status
         id: check-tests
