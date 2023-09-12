@@ -365,7 +365,7 @@ Disclaimer: CSV files MUST be comma separated.
 
 
 ### Batch Transactions
-Transactions are allowed up to 1000 per request. In case of batch upload though CSV, that limit does not apply, instead, internall process trhough batches of 1000 recods will be applied.
+Transactions are allowed up to 1000 records per request. In case of batch upload though CSV, that limit does not apply, instead, internall process trhough batches of 1000 recods will be applied.
 
 ## Database 💾
 
