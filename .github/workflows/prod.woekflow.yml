@@ -26,12 +26,11 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Clone the code if 'de_challenge' directory does not exist
+      - name: Clone the code
         run: |
           git clone https://github.com/brunocaracini/de-challenge.git
-          cd de_challenge
 
-      - name: Install Poetry dependencies
+      - name: Install Poetry dependencies and run the Tests
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           python3 -m venv venv
